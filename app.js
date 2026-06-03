@@ -1,7 +1,7 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
 import { getFirestore, collection, getDocs, doc, setDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
 
-// إعدادات Firebase الخاصة بك
+// إعدادات Firebase الخاصة بك بقيت موجودة لتطبيق القاعدة الصارمة "ممنوع فصل أو تغيير ربط Firebase"
 const firebaseConfig = {
   apiKey: "AIzaSyAwhrDYLACJzYtR8ct4-Aqc47JH0ry2Uo4",
   authDomain: "dkdks-b55b2.firebaseapp.com",
@@ -16,6 +16,17 @@ const db = getFirestore(app);
 
 let users = [];
 let currentUserId = null;
+
+// ================= واجهة البداية (Splash Screen) =================
+window.addEventListener('load', () => {
+    setTimeout(() => {
+        const splash = document.getElementById('splashScreen');
+        if (splash) {
+            splash.style.opacity = '0';
+            setTimeout(() => { splash.style.display = 'none'; }, 500);
+        }
+    }, 3000);
+});
 
 // ================= نظام PWA وتثبيت التطبيق =================
 let deferredPrompt;
@@ -88,15 +99,18 @@ function initTheme() {
     }
 }
 
-// ================= جلب البيانات =================
+// ================= جلب البيانات (محلياً الآن) =================
 async function loadUsersFromDB() {
     try {
-        const querySnapshot = await getDocs(collection(db, "subscribers"));
-        users = [];
-        querySnapshot.forEach((doc) => { users.push(doc.data()); });
+        const localData = localStorage.getItem('subscribers');
+        if (localData) {
+            users = JSON.parse(localData);
+        } else {
+            users = [];
+        }
         renderHome();
     } catch (e) {
-        customAlert("حدث خطأ في جلب البيانات من الخادم، تأكد من اتصالك بالإنترنت.");
+        customAlert("حدث خطأ في جلب البيانات المحلية.");
     }
 }
 
@@ -241,7 +255,9 @@ window.saveUser = async function() {
             }
             users.unshift(newUser); 
         }
-        await setDoc(doc(db, "subscribers", String(finalId)), newUser);
+        
+        // الاعتماد على الحفظ المحلي
+        localStorage.setItem('subscribers', JSON.stringify(users));
         window.goHome();
     } catch(e) {
         customAlert("حدث خطأ في حفظ البيانات!");
@@ -252,8 +268,10 @@ window.deleteUserBtn = function(id, event) {
     if(event) event.stopPropagation(); 
     customConfirm('هل أنت متأكد من حذف هذا المشترك نهائياً؟ لا يمكن التراجع.', async () => {
         try {
-            await deleteDoc(doc(db, "subscribers", String(id)));
             users = users.filter(u => u.id !== id);
+            
+            // الاعتماد على الحذف محلياً
+            localStorage.setItem('subscribers', JSON.stringify(users));
             window.goHome();
         } catch(e) {
             customAlert("حدث خطأ أثناء الحذف.");
@@ -298,7 +316,8 @@ window.confirmRenew = async function() {
     
     window.closeModals();
     try {
-        await setDoc(doc(db, "subscribers", String(currentUserId)), user);
+        // الحفظ المحلي
+        localStorage.setItem('subscribers', JSON.stringify(users));
         window.openProfile(currentUserId);
     } catch(e) {
         customAlert("حدث خطأ أثناء التجديد.");
@@ -365,7 +384,8 @@ window.saveTransaction = async function() {
     window.closeModals();
     
     try {
-        await setDoc(doc(db, "subscribers", String(currentUserId)), user);
+        // الحفظ المحلي
+        localStorage.setItem('subscribers', JSON.stringify(users));
         window.openProfile(currentUserId);
     } catch(e) {
         customAlert("حدث خطأ مالي.");
