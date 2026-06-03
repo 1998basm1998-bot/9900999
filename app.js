@@ -88,13 +88,18 @@ function loadUsersFromDB() {
     try {
         const localData = localStorage.getItem('subscribers');
         if (localData) {
-            users = JSON.parse(localData);
+            let parsedData = JSON.parse(localData);
+            // التحقق الصارم لضمان أن البيانات هي مصفوفة (Array) لمنع انهيار النظام
+            users = Array.isArray(parsedData) ? parsedData : [];
         } else {
             users = [];
         }
-        renderHome();
+        renderHome(); // مسح رسالة التحميل ورسم الواجهة مباشرة
     } catch (e) {
-        customAlert("حدث خطأ في جلب البيانات المحلية.");
+        // إذا كانت البيانات القديمة المخزنة تالفة، نهيئها من جديد ونزيل شاشة التحميل ليعمل التطبيق
+        users = [];
+        renderHome();
+        customAlert("تم تهيئة السجل وتصفيره بسبب خطأ في البيانات القديمة التالفة المخزنة في جهازك.");
     }
 }
 
