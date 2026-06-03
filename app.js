@@ -1,19 +1,3 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
-import { getFirestore, collection, getDocs, doc, setDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
-
-// إعدادات Firebase الخاصة بك بقيت موجودة لتطبيق القاعدة الصارمة "ممنوع فصل أو تغيير ربط Firebase"
-const firebaseConfig = {
-  apiKey: "AIzaSyAwhrDYLACJzYtR8ct4-Aqc47JH0ry2Uo4",
-  authDomain: "dkdks-b55b2.firebaseapp.com",
-  projectId: "dkdks-b55b2",
-  storageBucket: "dkdks-b55b2.firebasestorage.app",
-  messagingSenderId: "294287233762",
-  appId: "1:294287233762:web:eb6659a6ab685293d904bb"
-};
-
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-
 let users = [];
 let currentUserId = null;
 
@@ -99,8 +83,8 @@ function initTheme() {
     }
 }
 
-// ================= جلب البيانات (محلياً الآن) =================
-async function loadUsersFromDB() {
+// ================= جلب البيانات (محلياً) =================
+function loadUsersFromDB() {
     try {
         const localData = localStorage.getItem('subscribers');
         if (localData) {
@@ -219,7 +203,7 @@ window.closeModals = function() {
     document.querySelectorAll('.modal-overlay').forEach(m => m.classList.remove('active'));
 }
 
-window.saveUser = async function() {
+window.saveUser = function() {
     let fIdVal = document.getElementById('f-id').value;
     let finalId = fIdVal ? parseInt(fIdVal) : Date.now(); 
     let startDateObj = new Date(document.getElementById('f-start-date').value || new Date());
@@ -256,7 +240,7 @@ window.saveUser = async function() {
             users.unshift(newUser); 
         }
         
-        // الاعتماد على الحفظ المحلي
+        // الحفظ المحلي فقط
         localStorage.setItem('subscribers', JSON.stringify(users));
         window.goHome();
     } catch(e) {
@@ -266,11 +250,11 @@ window.saveUser = async function() {
 
 window.deleteUserBtn = function(id, event) {
     if(event) event.stopPropagation(); 
-    customConfirm('هل أنت متأكد من حذف هذا المشترك نهائياً؟ لا يمكن التراجع.', async () => {
+    customConfirm('هل أنت متأكد من حذف هذا المشترك نهائياً؟ لا يمكن التراجع.', () => {
         try {
             users = users.filter(u => u.id !== id);
             
-            // الاعتماد على الحذف محلياً
+            // الحذف محلياً فقط
             localStorage.setItem('subscribers', JSON.stringify(users));
             window.goHome();
         } catch(e) {
@@ -308,7 +292,7 @@ window.openRenewModal = function() {
     document.getElementById('renewModal').classList.add('active');
 }
 
-window.confirmRenew = async function() {
+window.confirmRenew = function() {
     let user = users.find(u => u.id === currentUserId);
     let selectedDate = new Date(document.getElementById('r-date').value);
     user.startDate = selectedDate.toISOString();
@@ -316,7 +300,7 @@ window.confirmRenew = async function() {
     
     window.closeModals();
     try {
-        // الحفظ المحلي
+        // الحفظ المحلي فقط
         localStorage.setItem('subscribers', JSON.stringify(users));
         window.openProfile(currentUserId);
     } catch(e) {
@@ -365,7 +349,7 @@ window.openDepositModal = function() {
     document.getElementById('depositModal').classList.add('active');
 }
 
-window.saveTransaction = async function() {
+window.saveTransaction = function() {
     let user = users.find(u => u.id === currentUserId);
     let type = document.getElementById('t-type').value;
     let amount = parseFloat(document.getElementById('t-amount').value);
@@ -384,7 +368,7 @@ window.saveTransaction = async function() {
     window.closeModals();
     
     try {
-        // الحفظ المحلي
+        // الحفظ المحلي فقط
         localStorage.setItem('subscribers', JSON.stringify(users));
         window.openProfile(currentUserId);
     } catch(e) {
