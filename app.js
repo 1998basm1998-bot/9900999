@@ -89,22 +89,17 @@ function loadUsersFromDB() {
         const localData = localStorage.getItem('subscribers');
         if (localData) {
             let parsedData = JSON.parse(localData);
-            // التحقق الصارم لضمان أن البيانات هي مصفوفة (Array) لمنع انهيار النظام
             users = Array.isArray(parsedData) ? parsedData : [];
         } else {
             users = [];
         }
-        renderHome(); // مسح رسالة التحميل ورسم الواجهة مباشرة
+        renderHome(); 
     } catch (e) {
-        // إذا كانت البيانات القديمة المخزنة تالفة، نهيئها من جديد ونزيل شاشة التحميل ليعمل التطبيق
         users = [];
         renderHome();
         customAlert("تم تهيئة السجل وتصفيره بسبب خطأ في البيانات القديمة التالفة المخزنة في جهازك.");
     }
 }
-
-initTheme();
-loadUsersFromDB(); 
 
 // ================= الدوال المساعدة =================
 function formatDateTimeLocal(date) {
@@ -417,3 +412,7 @@ window.filterUsers = function() {
         card.style.display = name.includes(val) ? 'flex' : 'none';
     });
 }
+
+// ==== النقلة المطلوبة لإصلاح الخطأ: تشغيل النظام يتم بعد تحميل جميع الدوال ====
+initTheme();
+loadUsersFromDB();
